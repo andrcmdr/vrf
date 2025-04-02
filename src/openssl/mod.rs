@@ -48,7 +48,7 @@ mod utils;
 
 /// Different cipher suites for different curves/algorithms
 #[allow(non_camel_case_types)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum CipherSuite {
     /// `SECP256K1` with `SHA256` and `ECVRF_hash_to_curve_try_and_increment`
     SECP256K1_SHA256_TAI,
