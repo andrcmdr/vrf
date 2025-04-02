@@ -29,6 +29,8 @@ use std::{
     os::raw::c_ulong,
 };
 
+use serde::{Deserialize, Serialize};
+
 use thiserror::Error;
 use hmac_sha256::HMAC;
 
@@ -48,7 +50,7 @@ mod utils;
 
 /// Different cipher suites for different curves/algorithms
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CipherSuite {
     /// `SECP256K1` with `SHA256` and `ECVRF_hash_to_curve_try_and_increment`
     SECP256K1_SHA256_TAI,
@@ -60,7 +62,7 @@ pub enum CipherSuite {
     SECP256R1_SHA256_TAI,
     SECP384R1_SHA384_TAI,
     SECP521R1_SHA512_TAI,
-    
+
     ECDSA_SECP256R1_SHA256_TAI,
     ECDSA_SECP384R1_SHA384_TAI,
     ECDSA_SECP521R1_SHA512_TAI,
@@ -79,7 +81,7 @@ pub enum CipherSuite {
     SECT409R1_SHA384_TAI,
     SECT571K1_SHA512_TAI,
     SECT571R1_SHA512_TAI,
-    
+
     BRAINPOOL_P256R1_SHA256_TAI,
     BRAINPOOL_P320R1_SHA256_TAI,
     BRAINPOOL_P384R1_SHA384_TAI,
@@ -96,11 +98,11 @@ impl CipherSuite {
             CipherSuite::SECP256R1_SHA256_TAI => 0x01,
             CipherSuite::SECP384R1_SHA384_TAI => 0xFD,
             CipherSuite::SECP521R1_SHA512_TAI => 0xFC,
-            
+
             CipherSuite::ECDSA_SECP256R1_SHA256_TAI => 0x01,
             CipherSuite::ECDSA_SECP384R1_SHA384_TAI => 0xFD,
             CipherSuite::ECDSA_SECP521R1_SHA512_TAI => 0xFC,
-            
+
             CipherSuite::SECT163K1_SHA256_TAI => 0xFF,
             CipherSuite::SECT163R1_SHA256_TAI => 0xFB,
             CipherSuite::SECT163R2_SHA256_TAI => 0xFA,
@@ -115,7 +117,7 @@ impl CipherSuite {
             CipherSuite::SECT409R1_SHA384_TAI => 0xF1,
             CipherSuite::SECT571K1_SHA512_TAI => 0xF0,
             CipherSuite::SECT571R1_SHA512_TAI => 0xEF,
-            
+
             CipherSuite::BRAINPOOL_P256R1_SHA256_TAI => 0xEE,
             CipherSuite::BRAINPOOL_P320R1_SHA256_TAI => 0xED,
             CipherSuite::BRAINPOOL_P384R1_SHA384_TAI => 0xEC,

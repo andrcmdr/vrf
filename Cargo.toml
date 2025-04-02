@@ -20,6 +20,8 @@ travis-ci = { repository = "witnet/vrf-rs", branch = "master" }
 thiserror = "2"
 openssl = "0.10"
 hmac-sha256 = "1.1.2"
+serde = { version = ">=1.0", features = ["derive"] }
+serde_json = { version = ">=1.0" }
 
 [dev-dependencies]
 clap = "2.32.0"
