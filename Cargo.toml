@@ -1,12 +1,12 @@
 [package]
 name = "vrf"
-version = "0.2.5"
-description = "Fast and extensible Verifiable Random Function (VRF) library; currently supporting secp256k1, secp256r1 and sect163k1 curves"
-keywords = ["vrf", "ecvrf", "secp256k1", "p256", "k163"]
+version = "0.3.0"
+description = "Fast and extensible Verifiable Random Function (VRF) library. Currently supporting SECP256K1, SECP256R1, SECP384R1 SECP521R1, SECT curves and BRAINPOOL_P256R1, BRAINPOOL_P320R1, BRAINPOOL_P384R1, BRAINPOOL_P512R1 curves."
+keywords = ["vrf", "ecfrv", "secp256k1", "secp256r1", "secp384r1", "secp521r1", "p256", "p384", "p521", "brainpool_p256r1", "brainpool_p320r1", "brainpool_p384r1", "brainpool_p512r1"]
 categories = ["algorithms", "cryptography"]
 license = "MIT"
 authors = ["Witnet Foundation <info@witnet.foundation>"]
-edition = "2018"
+edition = "2021"
 homepage = "https://github.com/witnet/vrf-rs"
 documentation = "https://docs.rs/vrf/"
 repository = "https://github.com/witnet/vrf-rs"
