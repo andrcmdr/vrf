@@ -88,6 +88,12 @@ pub enum CipherSuite {
     BRAINPOOL_P512R1_SHA512_TAI,
 }
 
+impl Default for CipherSuite {
+    fn default() -> Self {
+        CipherSuite::SECP256R1_SHA256_TAI
+    }
+}
+
 impl CipherSuite {
     fn suite_string(&self) -> u8 {
         match *self {
