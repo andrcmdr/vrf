@@ -95,7 +95,7 @@ impl Default for CipherSuite {
 }
 
 impl CipherSuite {
-    fn suite_string(&self) -> u8 {
+    pub fn suite_string(&self) -> u8 {
         match *self {
             CipherSuite::SECP256K1_SHA256_TAI => 0xFE,
             CipherSuite::P256_SHA256_TAI => 0x01,
