@@ -278,7 +278,7 @@ impl ECVRF {
     /// # Returns
     ///
     /// * If successful, an `EcPoint` representing the public key.
-    fn derive_public_key_point(&mut self, secret_key: &BigNum) -> Result<EcPoint, Error> {
+    pub fn derive_public_key_point(&mut self, secret_key: &BigNum) -> Result<EcPoint, Error> {
         let mut point = EcPoint::new(self.group.as_ref())?;
         // secret_key = point*generator
         point.mul_generator(&self.group, secret_key, &self.bn_ctx)?;
@@ -317,7 +317,7 @@ impl ECVRF {
     /// # Returns
     ///
     /// * If successful, the `BigNum` representing the nonce.
-    fn generate_nonce(&mut self, secret_key: &BigNum, data: &[u8]) -> Result<BigNum, Error> {
+    pub fn generate_nonce(&mut self, secret_key: &BigNum, data: &[u8]) -> Result<BigNum, Error> {
         // Bits to octets from data - bits2octets(h1)
         // We follow the new VRF-draft-05 in which the input is hashed`
         let data_hash = hash(self.hasher, data)?;
@@ -475,7 +475,7 @@ impl ECVRF {
     /// # Returns
     ///
     /// * A tuple containing the gamma `EcPoint`, and `BigNum` parameters `c` and `s`.
-    fn decode_proof(&mut self, pi: &[u8]) -> Result<(EcPoint, BigNum, BigNum), Error> {
+    pub fn decode_proof(&mut self, pi: &[u8]) -> Result<(EcPoint, BigNum, BigNum), Error> {
         let gamma_oct = if self.qlen % 8 > 0 {
             self.qlen / 8 + 2
         } else {
