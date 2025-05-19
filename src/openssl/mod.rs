@@ -130,6 +130,86 @@ impl CipherSuite {
             CipherSuite::BRAINPOOL_P512R1_SHA512_TAI => 0xEB,
         }
     }
+
+    pub fn cofactor(&self) -> u8 {
+        match *self {
+            CipherSuite::SECP256K1_SHA256_TAI => 0x01,
+            CipherSuite::P256_SHA256_TAI => 0x01,
+            CipherSuite::K163_SHA256_TAI => 0x02,
+
+            CipherSuite::SECP256R1_SHA256_TAI => 0x01,
+            CipherSuite::SECP384R1_SHA384_TAI => 0x01,
+            CipherSuite::SECP521R1_SHA512_TAI => 0x01,
+
+            CipherSuite::ECDSA_SECP256R1_SHA256_TAI => 0x01,
+            CipherSuite::ECDSA_SECP384R1_SHA384_TAI => 0x01,
+            CipherSuite::ECDSA_SECP521R1_SHA512_TAI => 0x01,
+
+            CipherSuite::SECT163K1_SHA256_TAI => 0x02,
+            CipherSuite::SECT163R1_SHA256_TAI => 0x02,
+            CipherSuite::SECT163R2_SHA256_TAI => 0x02,
+            CipherSuite::SECT193R1_SHA256_TAI => 0x02,
+            CipherSuite::SECT193R2_SHA256_TAI => 0x04,
+            CipherSuite::SECT233K1_SHA256_TAI => 0x04,
+            CipherSuite::SECT233R1_SHA256_TAI => 0x02,
+            CipherSuite::SECT239K1_SHA256_TAI => 0x04,
+            CipherSuite::SECT283K1_SHA384_TAI => 0x04,
+            CipherSuite::SECT283R1_SHA384_TAI => 0x02,
+            CipherSuite::SECT409K1_SHA384_TAI => 0x04,
+            CipherSuite::SECT409R1_SHA384_TAI => 0x02,
+            CipherSuite::SECT571K1_SHA512_TAI => 0x04,
+            CipherSuite::SECT571R1_SHA512_TAI => 0x02,
+
+            CipherSuite::BRAINPOOL_P256R1_SHA256_TAI => 0x01,
+            CipherSuite::BRAINPOOL_P320R1_SHA256_TAI => 0x01,
+            CipherSuite::BRAINPOOL_P384R1_SHA384_TAI => 0x01,
+            CipherSuite::BRAINPOOL_P512R1_SHA512_TAI => 0x01,
+        }
+    }
+    
+    pub fn to_nid(&self) -> Nid {
+        match *self {
+            CipherSuite::SECP256K1_SHA256_TAI => Nid::SECP256K1,
+            CipherSuite::P256_SHA256_TAI => Nid::X9_62_PRIME256V1,
+            CipherSuite::K163_SHA256_TAI => Nid::SECT163K1,
+
+            CipherSuite::SECP256R1_SHA256_TAI => Nid::X9_62_PRIME256V1,
+            CipherSuite::SECP384R1_SHA384_TAI => Nid::SECP384R1,
+            CipherSuite::SECP521R1_SHA512_TAI => Nid::SECP521R1,
+
+            CipherSuite::ECDSA_SECP256R1_SHA256_TAI => Nid::ECDSA_WITH_SHA256,
+            CipherSuite::ECDSA_SECP384R1_SHA384_TAI => Nid::ECDSA_WITH_SHA384,
+            CipherSuite::ECDSA_SECP521R1_SHA512_TAI => Nid::ECDSA_WITH_SHA512,
+
+            CipherSuite::SECT163K1_SHA256_TAI => Nid::SECT163K1,
+            CipherSuite::SECT163R1_SHA256_TAI => Nid::SECT163R1,
+            CipherSuite::SECT163R2_SHA256_TAI => Nid::SECT163R2,
+            CipherSuite::SECT193R1_SHA256_TAI => Nid::SECT193R1,
+            CipherSuite::SECT193R2_SHA256_TAI => Nid::SECT193R2,
+            CipherSuite::SECT233K1_SHA256_TAI => Nid::SECT233K1,
+            CipherSuite::SECT233R1_SHA256_TAI => Nid::SECT233R1,
+            CipherSuite::SECT239K1_SHA256_TAI => Nid::SECT239K1,
+            CipherSuite::SECT283K1_SHA384_TAI => Nid::SECT283K1,
+            CipherSuite::SECT283R1_SHA384_TAI => Nid::SECT283R1,
+            CipherSuite::SECT409K1_SHA384_TAI => Nid::SECT409K1,
+            CipherSuite::SECT409R1_SHA384_TAI => Nid::SECT409R1,
+            CipherSuite::SECT571K1_SHA512_TAI => Nid::SECT571K1,
+            CipherSuite::SECT571R1_SHA512_TAI => Nid::SECT571R1,
+
+            CipherSuite::BRAINPOOL_P256R1_SHA256_TAI => Nid::BRAINPOOL_P256R1,
+            CipherSuite::BRAINPOOL_P320R1_SHA256_TAI => Nid::BRAINPOOL_P320R1,
+            CipherSuite::BRAINPOOL_P384R1_SHA384_TAI => Nid::BRAINPOOL_P384R1,
+            CipherSuite::BRAINPOOL_P512R1_SHA512_TAI => Nid::BRAINPOOL_P512R1,
+        }
+    }
+
+    pub fn to_ec_group(&self) -> Result<EcGroup, ErrorStack> {
+        EcGroup::from_curve_name(self.to_nid())
+    }
+
+    pub fn digest(&self) -> Result<MessageDigest, Error> {
+        MessageDigest::from_nid(self.to_nid()).ok_or(Error::NidToDigestError)
+    }
 }
 
 /// Different errors that can be raised when proving/verifying VRFs
@@ -147,6 +227,9 @@ pub enum Error {
     /// The proof is invalid
     #[error("The proof is invalid")]
     InvalidProof,
+    /// The `CipherSuite.digest()` function doesn't return a digest (hash) corresponding to Nid of an algorithm
+    #[error("There's no message digest (hash) corresponding to cipher/algorithm ID ('Nid')")]
+    NidToDigestError,
     /// Unknown error
     #[error("Unknown error")]
     Unknown,
@@ -209,39 +292,8 @@ impl ECVRF {
         let mut bn_ctx = BigNumContext::new()?;
 
         // Elliptic Curve parameters
-        let (group, cofactor) = match suite {
-            CipherSuite::SECP256K1_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECP256K1)?, 0x01),
-            CipherSuite::P256_SHA256_TAI => (EcGroup::from_curve_name(Nid::X9_62_PRIME256V1)?, 0x01),
-            CipherSuite::K163_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECT163K1)?, 0x02),
-
-            CipherSuite::SECP256R1_SHA256_TAI => (EcGroup::from_curve_name(Nid::X9_62_PRIME256V1)?, 0x01),
-            CipherSuite::SECP384R1_SHA384_TAI => (EcGroup::from_curve_name(Nid::SECP384R1)?, 0x01),
-            CipherSuite::SECP521R1_SHA512_TAI => (EcGroup::from_curve_name(Nid::SECP521R1)?, 0x01),
-
-            CipherSuite::ECDSA_SECP256R1_SHA256_TAI => (EcGroup::from_curve_name(Nid::ECDSA_WITH_SHA256)?, 0x01),
-            CipherSuite::ECDSA_SECP384R1_SHA384_TAI => (EcGroup::from_curve_name(Nid::ECDSA_WITH_SHA384)?, 0x01),
-            CipherSuite::ECDSA_SECP521R1_SHA512_TAI => (EcGroup::from_curve_name(Nid::ECDSA_WITH_SHA512)?, 0x01),
-
-            CipherSuite::SECT163K1_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECT163K1)?, 0x02),
-            CipherSuite::SECT163R1_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECT163R1)?, 0x02),
-            CipherSuite::SECT163R2_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECT163R2)?, 0x02),
-            CipherSuite::SECT193R1_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECT193R1)?, 0x02),
-            CipherSuite::SECT193R2_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECT193R2)?, 0x04),
-            CipherSuite::SECT233K1_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECT233K1)?, 0x04),
-            CipherSuite::SECT233R1_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECT233R1)?, 0x02),
-            CipherSuite::SECT239K1_SHA256_TAI => (EcGroup::from_curve_name(Nid::SECT239K1)?, 0x04),
-            CipherSuite::SECT283K1_SHA384_TAI => (EcGroup::from_curve_name(Nid::SECT283K1)?, 0x04),
-            CipherSuite::SECT283R1_SHA384_TAI => (EcGroup::from_curve_name(Nid::SECT283R1)?, 0x02),
-            CipherSuite::SECT409K1_SHA384_TAI => (EcGroup::from_curve_name(Nid::SECT409K1)?, 0x04),
-            CipherSuite::SECT409R1_SHA384_TAI => (EcGroup::from_curve_name(Nid::SECT409R1)?, 0x02),
-            CipherSuite::SECT571K1_SHA512_TAI => (EcGroup::from_curve_name(Nid::SECT571K1)?, 0x04),
-            CipherSuite::SECT571R1_SHA512_TAI => (EcGroup::from_curve_name(Nid::SECT571R1)?, 0x02),
-
-            CipherSuite::BRAINPOOL_P256R1_SHA256_TAI => (EcGroup::from_curve_name(Nid::BRAINPOOL_P256R1)?, 0x01),
-            CipherSuite::BRAINPOOL_P320R1_SHA256_TAI => (EcGroup::from_curve_name(Nid::BRAINPOOL_P320R1)?, 0x01),
-            CipherSuite::BRAINPOOL_P384R1_SHA384_TAI => (EcGroup::from_curve_name(Nid::BRAINPOOL_P384R1)?, 0x01),
-            CipherSuite::BRAINPOOL_P512R1_SHA512_TAI => (EcGroup::from_curve_name(Nid::BRAINPOOL_P512R1)?, 0x01),
-        };
+        let group = suite.to_ec_group()?;
+        let cofactor = suite.cofactor();
 
         let mut order = BigNum::new()?;
         group.order(&mut order, &mut bn_ctx)?;
@@ -252,9 +304,8 @@ impl ECVRF {
         let n = ((p.num_bits() + (p.num_bits() % 2)) / 2) as usize;
         let qlen = order.num_bits() as usize;
 
-        // Hash algorithm: `SHA256`
-        // (only `P256_SHA256_TAI`, `K163_SHA256_TAI` and `SECP256K1_SHA256_TAI` are currently supported)
-        let hasher = MessageDigest::sha256();
+        // Hash algorithm
+        let hasher = suite.digest()?;
 
         Ok(ECVRF {
             cipher_suite: suite,
