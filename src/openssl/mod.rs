@@ -166,7 +166,7 @@ impl CipherSuite {
             CipherSuite::BRAINPOOL_P512R1_SHA512_TAI => 0x01,
         }
     }
-    
+
     pub fn to_nid(&self) -> Nid {
         match *self {
             CipherSuite::SECP256K1_SHA256_TAI => Nid::SECP256K1,
@@ -203,12 +203,48 @@ impl CipherSuite {
         }
     }
 
+    pub fn digest_to_nid(&self) -> Nid {
+        match *self {
+            CipherSuite::SECP256K1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::P256_SHA256_TAI => Nid::SHA256,
+            CipherSuite::K163_SHA256_TAI => Nid::SHA256,
+
+            CipherSuite::SECP256R1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::SECP384R1_SHA384_TAI => Nid::SHA384,
+            CipherSuite::SECP521R1_SHA512_TAI => Nid::SHA512,
+
+            CipherSuite::ECDSA_SECP256R1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::ECDSA_SECP384R1_SHA384_TAI => Nid::SHA384,
+            CipherSuite::ECDSA_SECP521R1_SHA512_TAI => Nid::SHA512,
+
+            CipherSuite::SECT163K1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::SECT163R1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::SECT163R2_SHA256_TAI => Nid::SHA256,
+            CipherSuite::SECT193R1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::SECT193R2_SHA256_TAI => Nid::SHA256,
+            CipherSuite::SECT233K1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::SECT233R1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::SECT239K1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::SECT283K1_SHA384_TAI => Nid::SHA384,
+            CipherSuite::SECT283R1_SHA384_TAI => Nid::SHA384,
+            CipherSuite::SECT409K1_SHA384_TAI => Nid::SHA384,
+            CipherSuite::SECT409R1_SHA384_TAI => Nid::SHA384,
+            CipherSuite::SECT571K1_SHA512_TAI => Nid::SHA512,
+            CipherSuite::SECT571R1_SHA512_TAI => Nid::SHA512,
+
+            CipherSuite::BRAINPOOL_P256R1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::BRAINPOOL_P320R1_SHA256_TAI => Nid::SHA256,
+            CipherSuite::BRAINPOOL_P384R1_SHA384_TAI => Nid::SHA384,
+            CipherSuite::BRAINPOOL_P512R1_SHA512_TAI => Nid::SHA512,
+        }
+    }
+
     pub fn to_ec_group(&self) -> Result<EcGroup, ErrorStack> {
         EcGroup::from_curve_name(self.to_nid())
     }
 
     pub fn digest(&self) -> Result<MessageDigest, Error> {
-        MessageDigest::from_nid(self.to_nid()).ok_or(Error::NidToDigestError)
+        MessageDigest::from_nid(self.digest_to_nid()).ok_or(Error::NidToDigestError)
     }
 }
 
